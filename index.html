@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Admin Panel</title>
+    <style>
+        :root {
+            --background: #1a202c;
+            --background-light: #2d3748;
+            --background-lighter: #4a5568;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --border-color: #4a5568;
+            --primary: #4299e1; /* Blue */
+            --success: #48bb78; /* Green */
+            --warning: #ed8936; /* Orange */
+            --danger: #f56565;  /* Red */
+            --info: #a0aec0;    /* Gray */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 30px;
+        }
+
+        .panel-section {
+            background-color: var(--background-light);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        select, .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        select {
+            background-color: var(--background-lighter);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        select option {
+            background-color: var(--background-light);
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .btn:disabled {
+            background-color: var(--background-lighter);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .current-status-box {
+            background-color: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 5px solid var(--danger);
+        }
+        .current-status-box .label {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .current-status-box .team-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--danger);
+        }
+        .current-status-box .pitch-type {
+            font-size: 1rem;
+            color: var(--warning);
+        }
+
+        .team-queue-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .team-item {
+            background-color: var(--background-light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--info);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .team-item:hover {
+            background-color: var(--background-lighter);
+            transform: translateX(5px);
+        }
+        .team-item.selected {
+            border-left-color: var(--primary);
+            box-shadow: 0 0 15px rgba(66, 153, 225, 0.2);
+        }
+        .team-item.presenting { border-left-color: var(--danger); }
+        .team-item.up-next { border-left-color: var(--warning); }
+        .team-item.completed { border-left-color: var(--success); opacity: 0.6; }
+
+        .team-info .team-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .team-info .leader-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .team-status-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tag-presenting { background-color: var(--danger); color: white; }
+        .tag-completed { background-color: var(--success); color: white; }
+        .tag-up-next { background-color: var(--warning); color: white; }
+        .tag-waiting { background-color: var(--background-lighter); color: var(--text-secondary); }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateY(200px);
+            transition: transform 0.4s ease-in-out;
+            background-color: var(--background-lighter);
+        }
+        .notification.show { transform: translateY(0); }
+        .notification.success { background-color: var(--success); }
+        .notification.error { background-color: var(--danger); }
+
+        @media (max-width: 968px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+            .team-queue-container {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1> ERROR 404 Hackathon Admin Panel</h1>
+        </div>
+
+        <div class="admin-grid">
+            <div class="panel-section">
+                <div class="section-title">
+                    <span>🎮</span> Control Panel
+                </div>
+
+                <div class="controls">
+                    <div class="current-status-box" id="currentStatusBox">
+                        <div class="label">Now Presenting</div>
+                        <div id="currentTeamName" class="team-name">None</div>
+                        <div id="currentPitchType" class="pitch-type">-</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="teamSelect">1. Select Team to Start</label>
+                        <select id="teamSelect">
+                            <option value="">Choose a team...</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="pitchSelect">2. Select Pitch Type</label>
+                        <select id="pitchSelect">
+                            <option value="">Select pitch type...</option>
+                            <option value="elevator">Elevator Pitch</option>
+                            <option value="idea">Idea Pitch</option>
+                            <option value="midway">Midway Pitch</option>
+                            <option value="investor">Investor/Business Pitch</option>
+                            <option value="final">Final Demo Pitch</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" id="startPresentationBtn" disabled>
+                        ▶ Start Presentation
+                    </button>
+
+                    <button class="btn btn-success" id="completePresentationBtn" disabled>
+                         Mark as Completed
+                    </button>
+                    <hr style="border-color: var(--border-color);">
+                    <button class="btn btn-danger" onclick="shuffleTeamOrder()">
+                         Shuffle Order
+                    </button>
+                    <button class="btn btn-danger" onclick="resetAllTeams()">
+                         Reset All Progress
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-title">
+                    <span>👥</span> Presentation Queue
+                </div>
+                <div class="team-queue-container" id="teamQueue">
+                    <p style="text-align: center; color: var(--text-secondary);">Loading teams...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+           apiKey: "AIzaSyAA9k_wUy8W4DUGGC59XKLf1SSA0kJpflk",
+           authDomain: "form-e9a10.firebaseapp.com",
+           databaseURL: "https://form-e9a10-default-rtdb.firebaseio.com",
+           projectId: "form-e9a10",
+           storageBucket: "form-e9a10.firebasestorage.app",
+           messagingSenderId: "522860381687",
+           appId: "1:522860381687:web:10def6869ab957940adaf2",
+           measurementId: "G-ZHT6HE42RM"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global variables
+        let teams = {};
+        let teamOrder = [];
+        let selectedTeamId = null;
+
+        // Pitch type mapping
+        const pitchTypes = {
+            'elevator': 'Elevator Pitch',
+            'idea': 'Idea Pitch',
+            'midway': 'Midway Pitch',
+            'investor': 'Investor/Business Pitch',
+            'final': 'Final Demo Pitch'
+        };
+
+        // DOM Elements
+        const teamSelect = document.getElementById('teamSelect');
+        const pitchSelect = document.getElementById('pitchSelect');
+        const startBtn = document.getElementById('startPresentationBtn');
+        const completeBtn = document.getElementById('completePresentationBtn');
+        
+        function initializeAdmin() {
+            database.ref('teams').on('value', (snapshot) => {
+                teams = snapshot.val() || {};
+                renderUI();
+            });
+
+            database.ref('teamOrder').on('value', (snapshot) => {
+                teamOrder = snapshot.val() || [];
+                renderUI();
+            });
+
+            // Set up event listeners
+            teamSelect.addEventListener('change', () => {
+                selectedTeamId = teamSelect.value;
+                renderUI();
+            });
+            pitchSelect.addEventListener('change', renderUI);
+            startBtn.addEventListener('click', startPresentation);
+            completeBtn.addEventListener('click', completePresentation);
+        }
+
+        function renderUI() {
+            if (!teams || !teamOrder) return;
+            
+            const currentTeam = Object.values(teams).find(t => t.isPresenting) || null;
+            
+            updateTeamSelect(currentTeam);
+            updateTeamQueue(currentTeam);
+            updateCurrentStatus(currentTeam);
+            updateButtonStates(currentTeam);
+        }
+        
+        function updateTeamSelect(currentTeam) {
+            const currentSelection = teamSelect.value;
+            teamSelect.innerHTML = '<option value="">Choose a team...</option>';
+            
+            teamOrder.forEach(teamId => {
+                const team = teams[teamId];
+                if (!team || team.isCompleted) return;
+                
+                const option = document.createElement('option');
+                option.value = teamId;
+                option.textContent = team.teamName;
+                
+                if (team.isPresenting) {
+                    option.textContent += ' (Presenting)';
+                }
+                
+                teamSelect.appendChild(option);
+            });
+            
+            teamSelect.value = selectedTeamId || currentSelection || '';
+        }
+
+        function updateTeamQueue(currentTeam) {
+            const queueContainer = document.getElementById('teamQueue');
+            queueContainer.innerHTML = '';
+
+            const nextTeamId = teamOrder.find(id => teams[id] && !teams[id].isCompleted && !teams[id].isPresenting);
+
+            teamOrder.forEach(teamId => {
+                const team = teams[teamId];
+                if (!team) return;
+
+                let statusText = 'Waiting';
+                let statusTagClass = 'tag-waiting';
+                let itemClass = '';
+
+                if (team.isCompleted) {
+                    statusText = 'Completed';
+                    statusTagClass = 'tag-completed';
+                    itemClass = 'completed';
+                } else if (team.isPresenting) {
+                    statusText = 'Presenting';
+                    statusTagClass = 'tag-presenting';
+                    itemClass = 'presenting';
+                } else if (teamId === nextTeamId) {
+                    statusText = 'Up Next';
+                    statusTagClass = 'tag-up-next';
+                    itemClass = 'up-next';
+                }
+
+                if (teamId === selectedTeamId) {
+                    itemClass += ' selected';
+                }
+
+                const teamElement = document.createElement('div');
+                teamElement.className = `team-item ${itemClass}`;
+                teamElement.innerHTML = `
+                    <div class="team-info">
+                        <div class="team-name">${team.teamName}</div>
+                        <div class="leader-name">${team.leader.name}</div>
+                    </div>
+                    <div class="team-status-tag ${statusTagClass}">${statusText}</div>
+                `;
+                teamElement.onclick = () => selectTeam(teamId);
+                queueContainer.appendChild(teamElement);
+            });
+        }
+
+        function updateCurrentStatus(currentTeam) {
+            const currentTeamNameEl = document.getElementById('currentTeamName');
+            const currentPitchTypeEl = document.getElementById('currentPitchType');
+            
+            if (currentTeam) {
+                currentTeamNameEl.textContent = currentTeam.teamName;
+                currentPitchTypeEl.textContent = pitchTypes[currentTeam.currentPitch] || '-';
+            } else {
+                currentTeamNameEl.textContent = 'None';
+                currentPitchTypeEl.textContent = '-';
+            }
+        }
+        
+        function updateButtonStates(currentTeam) {
+            const teamIsSelected = !!teamSelect.value;
+            const pitchIsSelected = !!pitchSelect.value;
+
+            startBtn.disabled = !teamIsSelected || !pitchIsSelected || !!currentTeam;
+            completeBtn.disabled = !currentTeam;
+        }
+
+        function selectTeam(teamId) {
+            if (teams[teamId]?.isCompleted) {
+                selectedTeamId = null;
+                teamSelect.value = '';
+                showNotification('This team has already completed their presentation.', 'error');
+            } else {
+                selectedTeamId = teamId;
+                teamSelect.value = teamId;
+            }
+            renderUI();
+        }
+
+        async function startPresentation() {
+            if (startBtn.disabled) return;
+            
+            const teamId = teamSelect.value;
+            const pitchType = pitchSelect.value;
+
+            try {
+                await database.ref(`teams/${teamId}`).update({
+                    isPresenting: true,
+                    currentPitch: pitchType,
+                });
+                showNotification(`Presentation started for ${teams[teamId].teamName}`, 'success');
+                pitchSelect.value = '';
+                selectedTeamId = null;
+            } catch (error) {
+                showNotification('Error starting presentation.', 'error');
+            }
+        }
+
+        async function completePresentation() {
+            if (completeBtn.disabled) return;
+            const currentTeamEntry = Object.entries(teams).find(([id, team]) => team.isPresenting);
+            if (!currentTeamEntry) return;
+
+            const [teamId, team] = currentTeamEntry;
+
+            try {
+                await database.ref(`teams/${teamId}`).update({
+                    isPresenting: false,
+                    isCompleted: true,
+                    currentPitch: null,
+                });
+                showNotification(`${team.teamName} marked as complete`, 'success');
+            } catch (error) {
+                showNotification('Error completing presentation.', 'error');
+            }
+        }
+        
+        async function shuffleTeamOrder() {
+            if (!confirm('Are you sure you want to shuffle the team order?')) return;
+            const shuffled = [...teamOrder].sort(() => Math.random() - 0.5);
+            try {
+                await database.ref('teamOrder').set(shuffled);
+                showNotification('Team order shuffled successfully', 'success');
+            } catch (error) {
+                showNotification('Failed to shuffle teams', 'error');
+            }
+        }
+
+        async function resetAllTeams() {
+            if (!confirm('DANGER! Are you sure you want to reset all team progress? This cannot be undone.')) return;
+            try {
+                const updates = {};
+                for (let teamId in teams) {
+                    updates[`teams/${teamId}/isPresenting`] = false;
+                    updates[`teams/${teamId}/isCompleted`] = false;
+                    updates[`teams/${teamId}/currentPitch`] = null;
+                }
+                await database.ref().update(updates);
+                showNotification('All teams reset successfully', 'success');
+            } catch (error) {
+                showNotification('Failed to reset teams', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeAdmin);
+    </script>
+</body>
+</html>
