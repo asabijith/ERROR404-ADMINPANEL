@@ -237,13 +237,13 @@
 
     <div class="container">
         <div class="header">
-            <h1> ERROR 404 Hackathon Admin Panel</h1>
+            <h1>Hackathon Admin Panel</h1>
         </div>
 
         <div class="admin-grid">
             <div class="panel-section">
                 <div class="section-title">
-                    <span>🎮</span> Control Panel
+                    <span>式</span> Control Panel
                 </div>
 
                 <div class="controls">
@@ -273,7 +273,7 @@
                     </div>
 
                     <button class="btn btn-primary" id="startPresentationBtn" disabled>
-                        ▶ Start Presentation
+                        笆ｶ Start Presentation
                     </button>
 
                     <button class="btn btn-success" id="completePresentationBtn" disabled>
@@ -291,7 +291,7 @@
 
             <div class="panel-section">
                 <div class="section-title">
-                    <span>👥</span> Presentation Queue
+                    <span>則</span> Presentation Queue
                 </div>
                 <div class="team-queue-container" id="teamQueue">
                     <p style="text-align: center; color: var(--text-secondary);">Loading teams...</p>
@@ -306,14 +306,14 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-           apiKey: "AIzaSyAA9k_wUy8W4DUGGC59XKLf1SSA0kJpflk",
-           authDomain: "form-e9a10.firebaseapp.com",
-           databaseURL: "https://form-e9a10-default-rtdb.firebaseio.com",
-           projectId: "form-e9a10",
-           storageBucket: "form-e9a10.firebasestorage.app",
-           messagingSenderId: "522860381687",
-           appId: "1:522860381687:web:10def6869ab957940adaf2",
-           measurementId: "G-ZHT6HE42RM"
+        apiKey: "AIzaSyC293rbJspVxRheRyvlBMPiivw8UWNEkjQ",
+  authDomain: "messageapp-47727.firebaseapp.com",
+  databaseURL: "https://messageapp-47727-default-rtdb.firebaseio.com",
+  projectId: "messageapp-47727",
+  storageBucket: "messageapp-47727.appspot.com",
+  messagingSenderId: "121824970903",
+  appId: "1:121824970903:web:2b31ddb44e54f9d80741d2",
+  measurementId: "G-MZFT5YEK7S"
         };
 
         // Initialize Firebase
@@ -447,9 +447,13 @@
             if (currentTeam) {
                 currentTeamNameEl.textContent = currentTeam.teamName;
                 currentPitchTypeEl.textContent = pitchTypes[currentTeam.currentPitch] || '-';
+                document.getElementById('currentStatusBox').style.borderLeftColor = 'var(--danger)';
+                currentTeamNameEl.style.color = 'var(--danger)';
             } else {
                 currentTeamNameEl.textContent = 'None';
                 currentPitchTypeEl.textContent = '-';
+                document.getElementById('currentStatusBox').style.borderLeftColor = 'var(--info)';
+                currentTeamNameEl.style.color = 'var(--text-primary)';
             }
         }
         
